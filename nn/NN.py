@@ -1,4 +1,7 @@
 import numpy as np  
+import time
+import os
+import sys
 
 from nn.utils import *
 
@@ -29,37 +32,34 @@ class NeuralNetwork:
 
         self.n_layers = len(dimensions) - 2 # Number oof hidden layers
         self.n_in = dimensions[0]
-        self.n_out = dimensions[1]
+        self.n_out = dimensions[-1]
 
-        self.layers = Sequence()
+        self.layers = Sequence([])
         self.dimensions = dimensions
         self.activations = activations
-
+     
         if self.n_layers == 0: # We don't have hidden layers
             self.layers.add(LinearLayer(self.n_in, self.n_out, activation=activations[0]))
 
         else:
             self.layers.add(LinearLayer(dimensions[0], dimensions[1],activation=activations[0]))
             for i in range(self.n_layers):
-                if activations[i] not in NeuralNetwork.ActivationFunctions:
+                if activations[i+1] not in NeuralNetwork.ActivationFunctions:
                         raise TypeError(f"Please, use some of the \033[1;31mavailable activation funcions: {NeuralNetwork.ActivationFunctions}\033[0m")
                 
                 self.layers.add(LinearLayer(dimensions[i+1],dimensions[i+2],activation=activations[i+1]))
 
             # Create last layer
-            self.layers.append(LinearLayer(dimensions[-2], self.dimensions[-1], activation= activations[-1]))
 
         self.n_trainable_parameters = 0
-        for i in range(self.n_layers): self.n_trainable_parameters += self.layers[i].n_trainable_parameters
+        for i in range(len(self.layers)): self.n_trainable_parameters += self.layers[i].n_trainable_parameters
     
     # DONE TODO - test
     def forward(self, input):
-        for l in self.layers:
-            input = l.forward(input)
-        return input
+        return self.layers.forward(input)
 
     # DONE TODO - test
-    def train(self, data, epochs, learning_rate=0.1, loss=CrossEntropy()):
+    def train(self, data, epochs, learning_rate=0.1, loss=CrossEntropy(), print_training = True):
         """
         Parameters
         ----------
@@ -79,24 +79,24 @@ class NeuralNetwork:
         print(f"\033[1;33mTrainable Parameters:\033[0m\t{self.n_trainable_parameters}")
         print(f"\033[1;32mNumber of Epochs:\033[0m\t{epochs}\n")
         
+        total = len(data)
+
         for e in range(epochs):
-            for x in data:
-                
+            i = 0
+            for X in data:
+                x, y = X[0], X[1]
+                "Make a charging bar format"
                 pred = self.forward(x)
                 y = self.to_one_hot(y)
                 
-                # d values represent the backpropagation errors
-                d = pred-y
-                self.layers[-1].deltas = d
-                d = self.layers[-1].weights.T @ d
+                if str(loss) == "CrossEntropy" and str(self.layers[-1].activation) == "Softmax":
+                    self.layers.backpropagate(step=learning_rate, delta = y-pred, update_parameters=True)
+                else:
+                    d = loss.partial(y,pred)
+                    self.layers.backpropagate(step=learning_rate,delta=d,update_parameters=True)
 
-                # Backpropagate errors
-                for i in range(self.n_layers):
-                        l = self.layers[self.n_layers-1-i]
-                        d = l.backpropagation(d)
-                
-                # Update weights
-                for l in self.layers: l.update_parameters(learning_rate)
+                sys.stdout.flush()
+               
 
     # DONE TODO - test
     def test(self, data):
@@ -117,13 +117,13 @@ class NeuralNetwork:
             acc +=  pred == y
         return acc/n
     
-    # DONE TODO - test
+    # DONE 
     def to_one_hot(self, label):
         v = np.zeros(shape = (self.n_out,))
         v[label] = 1
         return v
 
-    # DONE TODO - test
+    # DONE 
     def __str__(self):
         s = "Neural Network\n"
         ml = len(s)
@@ -136,7 +136,7 @@ class NeuralNetwork:
         s += "-"*ml
         return s
 
-# TODO - test 
+# DONEs
 class LinearLayer:
 
     # DONE 
@@ -190,7 +190,7 @@ class LinearLayer:
         self.cache =  d * self.activation.partial(self.z)
         return self.cache @ self.weights.T
 
-    # DONE TODO - test adam
+    # DONE TODO - test
     def update_parameters(self, learning_rate, batch = 1, adam = True):
         # Verify if we are working by batches
         #breakpoint()
@@ -239,7 +239,7 @@ class Sequence:
         return len(self.layers)
     
     # DONE
-    def backpropagate(self, step, delta, update_parameters = False):
+    def backpropagate(self, delta, step=0.1, update_parameters = False):
         #breakpoint()
         
         n = len(self.layers)

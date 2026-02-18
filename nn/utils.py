@@ -157,6 +157,7 @@ class KullbackLeibler:
 
 # TODO - test
 def split(data, train_size = 0.8, seed = None):
+        # Extend for pandas data
         if seed != None: 
             np.random.seed(seed)
         

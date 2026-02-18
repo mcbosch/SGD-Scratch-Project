@@ -85,7 +85,12 @@ class TestLayer(unittest.TestCase):
 # We didn't build a Test for Sequence because it's simply a list of layers, maybe in future updates.
 
 class TestNN(unittest.TestCase):
-    pass
+    def setUp(self):
+        self.nn = NeuralNetwork(dimensions=[2,3,2],
+                                activations=["ReLU","Softmax"])
+    
+    def test_forward():
+        pass
 
 if __name__ == '__main__':
     unittest.main()
