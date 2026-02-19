@@ -106,7 +106,7 @@ class MSE:
         else:
             return 0.5*np.sum(dif,axis=1)
         
-    def partial(self, *args, respect_to = "y"):
+    def partial(self, *args, respect_to = "x"):
         if respect_to not in self.valid_respect_to:
             raise KeyError(f"Please introduce a valid input for 'respect_to'\nOptions: {self.valid_respect_to}")
         

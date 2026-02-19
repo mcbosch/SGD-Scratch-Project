@@ -95,16 +95,18 @@ class NeuralNetwork:
             i = 0
             start_epoch = time.time()
             sys.stdout.write("\033[1A")
-            p1 = int(bar_width * e / epochs)
-            sys.stdout.write(f"\r\033[1mTraining {self.name}:\t{'':40s}\n")
+            p1 = int(bar_width * (e+1) / epochs)
+            perc1 = int(100*p1/bar_width)
+            sys.stdout.write(f"\r\033[1mTraining {self.name}:\t|\033[31;7m{' '*p1}\033[0m{' '*(bar_width-p1)}| {perc1:02d}%\n")
             sys.stdout.flush()
-            sys.stdout.write(f"\r\tEpoch: {e:02d}:\t{'':40s}")
+            sys.stdout.write(f"\r\tEpoch: {e+1:02d}|\t{'':40s}|")
             sys.stdout.flush()
             for X in data:
                 i+=1
                 x, y = X[0], X[1]
                 p2 = int(bar_width * i / total)
-                sys.stdout.write(f"\r\tEpoch {e:02d}:\t\033[32;7m{' '*p2}\033[0m{' '*(bar_width-p2)}| {p2:02d}%")
+                perc2 = int(100*p2/bar_width)
+                sys.stdout.write(f"\r\tEpoch {e+1:02d}:\t|\033[32;7m{' '*p2}\033[0m{' '*(bar_width-p2)}| {p2:02d}%")
                 sys.stdout.flush()
                 pred = self.forward(x)
                 y = self.to_one_hot(y)
@@ -114,7 +116,7 @@ class NeuralNetwork:
                     self.layers.backpropagate(step=learning_rate, delta = pred-y, update_parameters=True, first_delta_computed=True)
                 else:
                     d = loss.partial(pred,y)
-                    self.layers.backpropagate(step=learning_rate,delta=d,update_parameters=True)
+                    self.layers.backpropagate(step=learning_rate,delta=d, update_parameters=True, first_delta_computed= False)
             
             mean_loss_epochs.append(np.mean(loss_epoch))
             
@@ -215,7 +217,7 @@ class LinearLayer:
     def backpropagation(self, d, first_delta_computed = False):
         
         if first_delta_computed:
-            self.cache = d
+            self.cache = np.array(d)
         else:
             self.cache =  d * self.activation.partial(self.z)
         return self.cache @ self.weights.T
@@ -223,7 +225,7 @@ class LinearLayer:
     # DONE TODO - test
     def update_parameters(self, learning_rate, batch = 1, adam = True):
         # Verify if we are working by batches
-        breakpoint()
+        #breakpoint()
         self.weights = self.weights - learning_rate*np.outer(self.x, self.cache)  
         # PROBLEM WITH DIMENSIONALITY: REVISAR FÓRMULAS 
         if batch == 1:
@@ -276,7 +278,10 @@ class Sequence:
         for i in range(n):
             layer = self.layers[n-1-i]
             if i == 0:
-                delta = layer.backpropagation(delta, first_delta_computed)
+                delta = layer.backpropagation(delta, first_delta_computed = True)
+            else:
+                delta = layer.backpropagation(delta)
+
             if update_parameters:
                 layer.update_parameters(learning_rate = step)
         return delta

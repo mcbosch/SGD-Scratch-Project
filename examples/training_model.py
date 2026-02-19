@@ -13,9 +13,9 @@ model = NeuralNetwork([2,4,2],activations=["ReLU","Softmax"])
 #df_train, df_test = split(toy_data, 0.8)
 x_train, y_train = list(zip(list(toy_data["x"]),list(toy_data["y"]))), toy_data["label"]
 
-epochs = 50
+epochs = 100
 data = list(zip(x_train,y_train))
-loss_ep, t_ep = model.train(data,epochs,0.1)
+loss_ep, t_ep = model.train(data,epochs,0.01,loss=MSE())
 
 fig, ax1 = plt.subplots()
 color = 'tab:blue'
