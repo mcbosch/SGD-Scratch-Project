@@ -20,7 +20,7 @@ class NeuralNetwork:
     AF = {"ReLU": ReLU(), "Sigmoind": Sigmoind(), "Softmax": Softmax()}
 
     # DONE TODO - test
-    def __init__(self, dimensions, activations):
+    def __init__(self, dimensions, activations, name = "NeuralNetwork"):
         """
         Parameters
         ----------
@@ -29,7 +29,7 @@ class NeuralNetwork:
 
             Note that the len of activations should be 1 less than the dimensions
         """
-
+        self.name = name
         self.n_layers = len(dimensions) - 2 # Number oof hidden layers
         self.n_in = dimensions[0]
         self.n_out = dimensions[-1]
@@ -80,22 +80,48 @@ class NeuralNetwork:
         print(f"\033[1;32mNumber of Epochs:\033[0m\t{epochs}\n")
         
         total = len(data)
+        bar_width = 40
+
+        times_epochs = []
+        mean_loss_epochs = []
+
+        start_training_model = time.time()
+        sys.stdout.write(f"\033[1mTraining {self.name}:\t{'':40s}\n")
 
         for e in range(epochs):
+
+            loss_epoch = []
+
             i = 0
+            start_epoch = time.time()
+            sys.stdout.write("\033[1A")
+            p1 = int(bar_width * e / epochs)
+            sys.stdout.write(f"\r\033[1mTraining {self.name}:\t{'':40s}\n")
+            sys.stdout.flush()
+            sys.stdout.write(f"\r\tEpoch: {e:02d}:\t{'':40s}")
+            sys.stdout.flush()
             for X in data:
+                i+=1
                 x, y = X[0], X[1]
-                "Make a charging bar format"
+                p2 = int(bar_width * i / total)
+                sys.stdout.write(f"\r\tEpoch {e:02d}:\t\033[32;7m{' '*p2}\033[0m{' '*(bar_width-p2)}| {p2:02d}%")
+                sys.stdout.flush()
                 pred = self.forward(x)
                 y = self.to_one_hot(y)
                 
+                loss_epoch.append(loss(pred,y))
                 if str(loss) == "CrossEntropy" and str(self.layers[-1].activation) == "Softmax":
-                    self.layers.backpropagate(step=learning_rate, delta = y-pred, update_parameters=True)
+                    self.layers.backpropagate(step=learning_rate, delta = pred-y, update_parameters=True, first_delta_computed=True)
                 else:
-                    d = loss.partial(y,pred)
+                    d = loss.partial(pred,y)
                     self.layers.backpropagate(step=learning_rate,delta=d,update_parameters=True)
-
-                sys.stdout.flush()
+            
+            mean_loss_epochs.append(np.mean(loss_epoch))
+            
+            time_epoch = time.time() - start_epoch
+            times_epochs.append(time_epoch)
+        
+        return mean_loss_epochs, times_epochs
                
 
     # DONE TODO - test
@@ -186,16 +212,20 @@ class LinearLayer:
         
     
     # DONE
-    def backpropagation(self, d):
-        self.cache =  d * self.activation.partial(self.z)
+    def backpropagation(self, d, first_delta_computed = False):
+        
+        if first_delta_computed:
+            self.cache = d
+        else:
+            self.cache =  d * self.activation.partial(self.z)
         return self.cache @ self.weights.T
 
     # DONE TODO - test
     def update_parameters(self, learning_rate, batch = 1, adam = True):
         # Verify if we are working by batches
-        #breakpoint()
-        self.weights = self.weights - learning_rate*(self.x.T @ self.cache) # self.x are the activated neurons of the last layer. We can code it in order to 
-  
+        breakpoint()
+        self.weights = self.weights - learning_rate*np.outer(self.x, self.cache)  
+        # PROBLEM WITH DIMENSIONALITY: REVISAR FÓRMULAS 
         if batch == 1:
             self.bias = self.bias - (learning_rate/batch)* self.cache
         else:
@@ -239,13 +269,14 @@ class Sequence:
         return len(self.layers)
     
     # DONE
-    def backpropagate(self, delta, step=0.1, update_parameters = False):
+    def backpropagate(self, delta, step=0.1, update_parameters = False, first_delta_computed = False):
         #breakpoint()
         
         n = len(self.layers)
         for i in range(n):
             layer = self.layers[n-1-i]
-            delta = layer.backpropagation(delta)
+            if i == 0:
+                delta = layer.backpropagation(delta, first_delta_computed)
             if update_parameters:
                 layer.update_parameters(learning_rate = step)
         return delta

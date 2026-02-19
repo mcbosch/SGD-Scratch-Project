@@ -86,7 +86,7 @@ class CrossEntropy:
         assert len(args) > 0, f"Two parameters expected; just {len(args)} given"
         y_pred, y_true = args[0], args[1]
         if activated_neurons: # Computes the partial with respect the activated neurons
-            pass
+            return - y_pred / (y_true+1e-13) # Computationally inestable
         else: # Computes the partial with respect the non-activated neurons when we use as activation function a Softmax
             return y_pred - y_true
        
@@ -94,7 +94,7 @@ class CrossEntropy:
         return "CrossEntropy"
 
 # DONE
-class SqEuclideanDistance:
+class MSE:
 
     def __init__(self):
         self.valid_respect_to = ["x","y"]
@@ -117,7 +117,7 @@ class SqEuclideanDistance:
             return x-y
 
     def __str__(self):
-        return "SqEuclideanDistance"
+        return "MSE"
 
 # DONE TODO - test
 class KullbackLeibler:
@@ -217,5 +217,3 @@ def to_cov_matrix(log_var, dim_matrix = 1):
     else:
         raise TypeError("We have not yet implemented a full cov matrix option")
     
-def charging_format(i, total):
-    M = "\033"
