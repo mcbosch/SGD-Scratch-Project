@@ -99,14 +99,14 @@ class NeuralNetwork:
             perc1 = int(100*p1/bar_width)
             sys.stdout.write(f"\r\033[1mTraining {self.name}:\t|\033[31;7m{' '*p1}\033[0m{' '*(bar_width-p1)}| {perc1:02d}%\n")
             sys.stdout.flush()
-            sys.stdout.write(f"\r\tEpoch: {e+1:02d}|\t{'':40s}|")
+            sys.stdout.write(f"\r\tEpoch: {e+1:02d}\t|{'':40s}|")
             sys.stdout.flush()
             for X in data:
                 i+=1
                 x, y = X[0], X[1]
                 p2 = int(bar_width * i / total)
                 perc2 = int(100*p2/bar_width)
-                sys.stdout.write(f"\r\tEpoch {e+1:02d}:\t|\033[32;7m{' '*p2}\033[0m{' '*(bar_width-p2)}| {p2:02d}%")
+                sys.stdout.write(f"\r\tEpoch {e+1:02d}:\t|\033[32;7m{' '*p2}\033[0m{' '*(bar_width-p2)}| {perc2:02d}%")
                 sys.stdout.flush()
                 pred = self.forward(x)
                 y = self.to_one_hot(y)
