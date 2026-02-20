@@ -1,10 +1,9 @@
 import numpy as np
-import sys
-import os
+
 
 # ================== ACTIVATION FUNCTIONS
 
-# DONE
+# DONE - test DONE
 class ReLU:
     # DONE
     def __call__(self, x):
@@ -18,7 +17,7 @@ class ReLU:
     def __str__(self):
         return "ReLU"
 
-# DONE
+# DONE - test DONE
 class Sigmoind:
 
     # DONE
@@ -35,16 +34,27 @@ class Sigmoind:
     def __str__(self):
         return "Sigmoind"
 
-# DONE
+# DONE - test DONE
 class Softmax:
     def __call__(self, x):
+        x = np.clip(x,-500,500)
         exps = np.exp(x)  # Maybe we have to add more estability
         if len(x.shape) == 1:
             return exps / np.sum(exps)
         return (exps.T / np.sum(exps, axis=1)).T
     
     def partial(self, x):
-         return np.diag(x) - np.outer(x, x)
+         breakpoint()
+         x = np.clip(x, -500, 500)
+         a = self(x)
+         s = x.shape
+         if len(s) == 1:
+             Id = np.eye(s[0])
+         elif len(s) == 2:
+             Id = np.array([np.eye(s[1]) for _ in range(s[0])])
+         else:
+             raise KeyError("Softmax Partial only supports np.arrays of shape (j,) or (i,j)")
+         return (a*(Id-a).T).T # This operator doesent support batched entrys
     
     def __str__(self):
         return "Softmax"
