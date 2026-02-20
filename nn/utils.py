@@ -54,7 +54,7 @@ class Softmax:
 """
 The loss functions allows to receive as an input a matrix. Then it treats each row as an observation and computes the loss for that row. We do this to be able to work with batches. 
 """
-# DONE
+# DONE - Test Done
 class CrossEntropy:
     """
     The CrossEntropy object is a callable object that computes the CrossEntropy loss of a prediction and it's real value.
@@ -72,7 +72,7 @@ class CrossEntropy:
         -------
             Returns the CrossEntropy of each vector
         """
-        assert len(args) > 0, f"Two parameters expected; just {len(args)} given"
+        assert len(args) > 0, f"Two parameters expected; {len(args)} given"
         y_pred, y_true = args[0], args[1]
         # We check the dimensionality (if it comes as )
         if len(y_pred.shape) > 1:
@@ -86,18 +86,19 @@ class CrossEntropy:
         assert len(args) > 0, f"Two parameters expected; just {len(args)} given"
         y_pred, y_true = args[0], args[1]
         if activated_neurons: # Computes the partial with respect the activated neurons
-            return - y_pred / (y_true+1e-13) # Computationally inestable
+            return - y_true / (y_pred+1e-13) # Computationally inestable
         else: # Computes the partial with respect the non-activated neurons when we use as activation function a Softmax
             return y_pred - y_true
        
     def __str__(self):
         return "CrossEntropy"
 
-# DONE
+# DONE - test DONE
 class MSE:
 
     def __init__(self):
         self.valid_respect_to = ["x","y"]
+
     def __call__(self, *args):
         X, Y = args[0], args[1]
         dif = (X - Y)**2
@@ -119,7 +120,7 @@ class MSE:
     def __str__(self):
         return "MSE"
 
-# DONE TODO - test
+# DONE TODO - test (for VAE)
 class KullbackLeibler:
     """
     Computes the Kullback-Leibler Divergence of two normals.
