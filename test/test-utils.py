@@ -141,6 +141,5 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(np.allclose(r, expected, rtol = 1e-12),
                         msg=f"\033[31mError\033[0m\tGiven: {r}; Expected {expected}")
         
-        
 if __name__ == '__main__':
     unittest.main(verbosity=2)
