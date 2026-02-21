@@ -44,18 +44,21 @@ class Softmax:
         return (exps.T / np.sum(exps, axis=1)).T
     
     def partial(self, x):
-         breakpoint()
-         x = np.clip(x, -500, 500)
-         a = self(x)
-         s = x.shape
-         if len(s) == 1:
-             Id = np.eye(s[0])
-         elif len(s) == 2:
-             Id = np.array([np.eye(s[1]) for _ in range(s[0])])
-         else:
-             raise KeyError("Softmax Partial only supports np.arrays of shape (j,) or (i,j)")
-         return (a*(Id-a).T).T # This operator doesent support batched entrys
-    
+
+        x = np.clip(x, -500, 500)
+        a = self(x)
+        s = x.shape
+        if len(s) == 1:
+            Id = np.eye(s[0])
+            return a[:,np.newaxis]*(Id-a)
+        elif len(s) == 2:
+            Id = np.array([np.eye(s[1]) for _ in range(s[0])])
+            return a[:,:,np.newaxis]*(Id-a[:,np.newaxis,:])
+        else:
+            raise KeyError("Softmax Partial only supports np.arrays of shape (j,) or (i,j)")
+        
+        
+
     def __str__(self):
         return "Softmax"
 
