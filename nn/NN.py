@@ -59,7 +59,7 @@ class NeuralNetwork:
         return self.layers.forward(input)
 
     # DONE TODO - test
-    def train(self, data, epochs, learning_rate=0.1, loss=CrossEntropy(), print_training = True):
+    def train(self, data, epochs, learning_rate=0.1, loss=CrossEntropy(), adam = True, print_training = True):
         """
         Parameters
         ----------
@@ -113,10 +113,10 @@ class NeuralNetwork:
                 
                 loss_epoch.append(loss(pred,y))
                 if str(loss) == "CrossEntropy" and str(self.layers[-1].activation) == "Softmax":
-                    self.layers.backpropagate(step=learning_rate, delta = pred-y, update_parameters=True, first_delta_computed=True)
+                    self.layers.backpropagate(step=learning_rate, delta = pred-y, update_parameters=True, first_delta_computed=True, adam=adam)
                 else:
                     d = loss.partial(pred,y)
-                    self.layers.backpropagate(step=learning_rate,delta=d, update_parameters=True, first_delta_computed= False)
+                    self.layers.backpropagate(step=learning_rate,delta=d, update_parameters=True, first_delta_computed= False, adam=adam)
             
             mean_loss_epochs.append(np.mean(loss_epoch))
             
@@ -224,15 +224,18 @@ class LinearLayer:
         return self.cache @ self.weights.T
 
     # DONE TODO - test
-    def update_parameters(self, learning_rate, batch = 1, adam = True):
+    def update_parameters(self, learning_rate, batch = 1, adam = True, momentum_factor = 0.9):
         # Verify if we are working by batches
         #breakpoint()
-        self.weights = self.weights - learning_rate*np.outer(self.x, self.cache)  
-        # PROBLEM WITH DIMENSIONALITY: REVISAR FÓRMULAS 
-        if batch == 1:
-            self.bias = self.bias - (learning_rate/batch)* self.cache
+        if adam:
+            pass
         else:
-            self.bias = self.bias - (learning_rate/batch)* np.sum(self.cache, axis=0)
+            self.weights = self.weights - learning_rate*np.outer(self.x, self.cache)  
+            # PROBLEM WITH DIMENSIONALITY: REVISAR FÓRMULAS 
+            if batch == 1:
+                self.bias = self.bias - (learning_rate/batch)* self.cache
+            else:
+                self.bias = self.bias - (learning_rate/batch)* np.sum(self.cache, axis=0)
     
     # DONE
     def __str__(self):
@@ -272,7 +275,7 @@ class Sequence:
         return len(self.layers)
     
     # DONE
-    def backpropagate(self, delta, step=0.1, update_parameters = False, first_delta_computed = False):
+    def backpropagate(self, delta, step=0.1, update_parameters = False, first_delta_computed = False, adam=True):
         #breakpoint()
         
         n = len(self.layers)
@@ -284,7 +287,7 @@ class Sequence:
                 delta = layer.backpropagation(delta)
 
             if update_parameters:
-                layer.update_parameters(learning_rate = step)
+                layer.update_parameters(learning_rate = step, adam=adam)
         return delta
             
 
