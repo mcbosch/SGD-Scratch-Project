@@ -16,6 +16,6 @@ The model with a basic Gradient Descendent works perfectly but is too slow. We c
 <img src="../examples/toy-square-my-nn.png" alt="Description" width=45% height="200">
 <img src="./Figure_1_nn.png", height = "200", width = 45%>
 
-If we compare with the torch Neural Network (same size and activation layers), we can see the following results:
+Has the model a good ACC? --> **Add an option of validation dataset to compute acc on training after each epoch**. Maybe add 
 ## ADAM
 ## SGD

@@ -4,6 +4,8 @@ In this repository I try to build a basic neural network package builded from sc
 1. `numpy`: All the NN structure uses numpy
 2. `pandas`: Only used to load, store datasets and save our results 
 
+Note that making an atomic neural network it's easy. It's just a bunch of afins transformations with a non-linear function in the middle. I will build an atomic version for the people that want to understand a simple nn. Nevertheless, I've done a more complex version similar to torch to be able to work with complex data, batches, autoencoders, etc.  
+
 Other packages may be used only to load datasets and study our models performence. Moreover, we build a NN with pytorch to compare results. 
 
 I know there's a lot of repositories with neural networks from scratch. As I said, is for learning purposes. My final objective is to introduce myself into Variational Inerence and build Variational Autoencoders from scratch. I already tryed, you can see the repository [here](). Nevertheess, the learning was strange and slow, so I want to do the basics better, so I have a more scalable project to build Variational Autoencoders.

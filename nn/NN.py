@@ -59,7 +59,14 @@ class NeuralNetwork:
         return self.layers.forward(input)
 
     # DONE TODO - test
-    def train(self, data, epochs, learning_rate=0.1, loss=CrossEntropy(), adam = True, print_training = True):
+    def train(self, 
+              data, 
+              epochs, 
+              learning_rate=0.1, 
+              beta_1 = 0.9,
+              beta_2 = 0.99, 
+              loss=CrossEntropy(), 
+              adam = True):
         """
         Parameters
         ----------
@@ -91,6 +98,7 @@ class NeuralNetwork:
         for e in range(epochs):
 
             loss_epoch = []
+            
             total=len(data)
             i = 0
             start_epoch = time.time()
@@ -112,11 +120,23 @@ class NeuralNetwork:
                 y = self.to_one_hot(y)
                 
                 loss_epoch.append(loss(pred,y))
-                if str(loss) == "CrossEntropy" and str(self.layers[-1].activation) == "Softmax":
-                    self.layers.backpropagate(step=learning_rate, delta = pred-y, update_parameters=True, first_delta_computed=True, adam=adam)
-                else:
-                    d = loss.partial(pred,y)
-                    self.layers.backpropagate(step=learning_rate,delta=d, update_parameters=True, first_delta_computed= False, adam=adam)
+                
+                if i == 1:
+                    # Initialize momentums
+                    momentums = [(0,0) for _ in range(len(self.layers))] if adam else None
+
+                first_delta_comp = str(loss) == "CrossEntropy" and str(self.layers[-1].activation) == "Softmax"
+                delta = pred - y if first_delta_comp else loss.partial(pred,y)
+
+                _, momentums = self.layers.backpropagate(step=learning_rate,
+                                               beta_1 = beta_1,
+                                               beta_2 = beta_2,
+                                               momentums = momentums,
+                                               delta = delta,
+                                               update_parameters=True, 
+                                               first_delta_computed= first_delta_comp, 
+                                               adam=adam)
+                
             
             mean_loss_epochs.append(np.mean(loss_epoch))
             
@@ -224,18 +244,41 @@ class LinearLayer:
         return self.cache @ self.weights.T
 
     # DONE TODO - test
-    def update_parameters(self, learning_rate, batch = 1, adam = True, momentum_factor = 0.9):
+    def update_parameters(self, 
+                          learning_rate, 
+                          beta_1 = 0.9, 
+                          beta_2 = 0.9, 
+                          m0 = 0, 
+                          v0 = 0, 
+                          batch = 1, 
+                          adam = True):
         # Verify if we are working by batches
         #breakpoint()
-        if adam:
-            pass
+        partial_weights = np.outer(self.x, self.cache)
+        if batch == 1:
+            partial_bias = self.cache
         else:
-            self.weights = self.weights - learning_rate*np.outer(self.x, self.cache)  
-            # PROBLEM WITH DIMENSIONALITY: REVISAR FÓRMULAS 
-            if batch == 1:
-                self.bias = self.bias - (learning_rate/batch)* self.cache
-            else:
-                self.bias = self.bias - (learning_rate/batch)* np.sum(self.cache, axis=0)
+            partial_bias = np.sum(self.cache, axis=1)
+            
+        if adam:
+            m1 = beta_1 * m0 + (1 - beta_1) * partial_weights
+            sqnorm_partial_weighs = np.sum(partial_weights**2) if batch == 1 else np.sum(partial_weights**2, axis = (1,2))
+            v1 = beta_2 * v0 + (1 - beta_2) * sqnorm_partial_weighs
+
+            # Bias correction
+            m1h = m1/(1-beta_1)
+            v1h = v1/(1-beta_2)
+
+            self.weights = self.weights - (learning_rate / (np.sqrt(v1h) + 1e-10)) * m1h
+            self.bias = self.bias - learning_rate*partial_bias
+            return m1, v1
+        
+        else:
+
+            self.weights = self.weights - learning_rate * partial_weights
+            self.bias = self.bias - learning_rate * partial_bias
+            return None
+
     
     # DONE
     def __str__(self):
@@ -275,20 +318,39 @@ class Sequence:
         return len(self.layers)
     
     # DONE
-    def backpropagate(self, delta, step=0.1, update_parameters = False, first_delta_computed = False, adam=True):
+    def backpropagate(self, 
+                      delta, 
+                      step=0.1, 
+                      beta_1 = 0.9,
+                      beta_2 = 0.9, 
+                      momentums = None,
+                      update_parameters = False, first_delta_computed = False, 
+                      adam=True):
         #breakpoint()
         
         n = len(self.layers)
         for i in range(n):
             layer = self.layers[n-1-i]
             if i == 0:
-                delta = layer.backpropagation(delta, first_delta_computed = True)
+                delta = layer.backpropagation(delta, first_delta_computed = first_delta_computed)
             else:
                 delta = layer.backpropagation(delta)
 
             if update_parameters:
-                layer.update_parameters(learning_rate = step, adam=adam)
-        return delta
+                if momentums != None and adam:
+                    m0, v0 = momentums[i]
+                    m1, v1 = layer.update_parameters(learning_rate = step,
+                                         beta_1 = beta_1, 
+                                         beta_2 = beta_2, 
+                                         m0 = m0, 
+                                         v0 = v0, 
+                                         adam=adam)
+                    momentums[i] = (m1,v1)
+                else:
+                    layer.update_parameters(learning_rate = step)
+
+            
+        return delta, momentums
             
 
         
