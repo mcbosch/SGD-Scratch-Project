@@ -15,15 +15,15 @@ y_train = data['y_train']
 print("Transforming matrixs to vectors of shape: ", x_train[0].shape[0]*x_train[0].shape[1])
 x_train = [x_train[i].reshape(-1)*1/255 for i in range(len(x_train))] # Normalize data to avoid overflow problems
 
-model = NeuralNetwork([784,524,10],activations=["ReLU","ReLU","ReLU"])
+model = NeuralNetwork([784,524,124,10],activations=["ReLU","ReLU","Softmax"])
 
 epochs = 100
 data = list(zip(x_train,y_train))
 print("Datapoints: ", len(data))
 print("Shape: ", data[0][0].shape)
-data, _ = split(data, 0.1)
+data_train, data_val = split(data, 0.02)
 
-loss_ep, t_ep = model.train(data,epochs,0.01,loss=MSE())
+loss_ep, t_ep = model.train(data,epochs,0.01,batch=100,loss=CrossEntropy(),adam=False)
 
 fig, ax1 = plt.subplots()
 color = 'tab:blue'

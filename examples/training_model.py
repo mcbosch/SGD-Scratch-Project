@@ -4,18 +4,22 @@ import matplotlib.pyplot as plt
 
 from nn.NN import *
 from nn.utils import *
-
+"""
+Why Loss Now increases with random batches?
+"""
 
 # Load data
 toy_data = pd.read_csv("examples\datasets\square_regions.csv")
 # Build model
-model = NeuralNetwork([2,2,2],activations=["ReLU","ReLU"])
+model = NeuralNetwork([2,2,2],activations=["ReLU","Softmax"])
 #df_train, df_test = split(toy_data, 0.8)
 x_train, y_train = list(zip(list(toy_data["x"]),list(toy_data["y"]))), toy_data["label"]
 
-epochs = 50
+epochs = 100
 data = list(zip(x_train,y_train))
-loss_ep, t_ep = model.train(data,epochs,0.01,loss=MSE(),adam=False)
+
+
+loss_ep, t_ep = model.train(data,epochs,0.01,batch=1,loss=CrossEntropy(),adam=False)
 
 fig, ax1 = plt.subplots()
 color = 'tab:blue'
@@ -25,10 +29,9 @@ ax1.plot(list(range(epochs)), loss_ep, color = color)
 ax1.tick_params(axis='y', labelcolor=color)
 
 ax2 = ax1.twinx()
-
 color = 'tab:red'
 ax2.set_ylabel('time', color=color)
-ax2.plot(list(range(epochs)), t_ep, color = color, alpha=0.7, linestyle = 'dashed')
+ax2.plot(list(range(epochs)), t_ep, color = color, alpha=0.6, linestyle = 'dashed')
 ax2.tick_params(axis='y', labelcolor=color)
 
 fig.tight_layout()

@@ -1,6 +1,5 @@
 import numpy as np
 
-
 # ================== ACTIVATION FUNCTIONS
 
 # DONE - test DONE
@@ -18,7 +17,7 @@ class ReLU:
         return "ReLU"
 
 # DONE - test DONE
-class Sigmoind:
+class Sigmoid:
 
     # DONE
     def __call__(self, x):
@@ -32,7 +31,7 @@ class Sigmoind:
         
     # DONE
     def __str__(self):
-        return "Sigmoind"
+        return "Sigmoid"
 
 # DONE - test DONE
 class Softmax:
@@ -87,21 +86,21 @@ class CrossEntropy:
         """
         assert len(args) > 0, f"Two parameters expected; {len(args)} given"
         y_pred, y_true = args[0], args[1]
-        # We check the dimensionality (if it comes as )
-        if len(y_pred.shape) > 1:
-            # We have a batch of vectors; each row is a datapoint
-            return -np.sum(y_true * np.log(y_pred + 1e-13), axis = 1)  # evitar log(0)
-        else:
-            return -np.sum(y_true * np.log(y_pred + 1e-13))
+        # We check the dimensionality (if it comes as batch of vectors )
+        batch = len(y_pred) if len(y_pred.shape) > 1 else 1
+        # We have a batch of vectors; each row is a datapoint
+        return -np.sum(y_true * np.log(y_pred + 1e-13))/batch 
+        
 
     def partial(self, *args, activated_neurons=True):
     
         assert len(args) > 0, f"Two parameters expected; just {len(args)} given"
         y_pred, y_true = args[0], args[1]
+        batch = len(y_pred) if len(y_pred.shape) > 1 else 1
         if activated_neurons: # Computes the partial with respect the activated neurons
-            return - y_true / (y_pred+1e-13) # Computationally inestable
+            return - y_true / (batch*(y_pred+1e-13)) # Computationally inestable
         else: # Computes the partial with respect the non-activated neurons when we use as activation function a Softmax
-            return y_pred - y_true
+            return (y_pred - y_true)/batch
        
     def __str__(self):
         return "CrossEntropy"
@@ -114,21 +113,20 @@ class MSE:
 
     def __call__(self, *args):
         X, Y = args[0], args[1]
+        batch = len(X) if len(X.shape) > 1 else 1
         dif = (X - Y)**2
-        if len(dif.shape) == 1:
-            return np.sum(0.5*dif)
-        else:
-            return 0.5*np.sum(dif,axis=1)
+        return 0.5*np.sum(dif)/batch
         
     def partial(self, *args, respect_to = "x"):
         if respect_to not in self.valid_respect_to:
             raise KeyError(f"Please introduce a valid input for 'respect_to'\nOptions: {self.valid_respect_to}")
         
         x, y = args[0], args[1]
+        batch = len(x) if len(x.shape) > 1 else 1
         if respect_to == "y":
-            return y-x
+            return (y-x)*1/batch
         elif respect_to == "x":
-            return x-y
+            return (x-y)*1/batch
 
     def __str__(self):
         return "MSE"
@@ -206,15 +204,19 @@ def random_batches(data, batch_size):
     """
     data = list(data)  # make sure we can index
     n = len(data)
-    
+
     indices = np.random.permutation(n)
     
     batches = []
     for start in range(0, n, batch_size):
         batch_indices = indices[start:start + batch_size]
-        batch = [data[i] for i in batch_indices]
+        batch_x, batch_y = [], []
+        for i in batch_indices:
+            batch_x.append(data[i][0])
+            batch_y.append(data[i][1])
+        batch = (np.array(batch_x), np.array(batch_y))
         batches.append(batch)
-    return np.array(batches)
+    return batches
 
 # TODO - test
 def to_one_hot(n, label):
