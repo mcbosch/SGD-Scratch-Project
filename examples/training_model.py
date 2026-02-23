@@ -11,7 +11,7 @@ Why Loss Now increases with random batches?
 # Load data
 dataset = {'square': "examples\datasets\square_regions.csv",
            'circle': "examples\datasets\circle_regions.csv"}
-data_name = 'circle'
+data_name = 'square'
 toy_data = pd.read_csv(dataset[data_name])
 
 #df_train, df_test = split(toy_data, 0.8)
@@ -25,7 +25,7 @@ model = NeuralNetwork([LinearLayer(2,3,activation="Softmax"),
 
 
 n_classes = len(np.unique(Y))
-epochs = 50
+epochs = 100
 print(f"\nDataset: \tTrain: {len(data_train)} | Val: {len(data_val)} | Test: {len(data_test)} | Clases: {list(range(n_classes))}\n")
 
 results = model.train(data_train,epochs,0.01,batch_size=20,loss=CrossEntropy(),adam=True, data_val = data_val)
