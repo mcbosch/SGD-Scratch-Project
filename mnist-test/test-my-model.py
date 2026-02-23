@@ -15,21 +15,21 @@ x_test = data['x_test']
 y_test = data['y_test']
 # Transforming to vectors
 x_train = [x_train[i].reshape(-1)*1/255 for i in range(len(x_train))] # Normalize data to avoid overflow problems 
-model = NeuralNetwork([LinearLayer(784,524,activation="ReLU"),
-                       LinearLayer(524,124,activation="ReLU"),
+model = NeuralNetwork([LinearLayer(784,124,activation="ReLU"),
+                       LinearLayer(124,124,activation="ReLU"),
                        LinearLayer(124,10,activation="Softmax")])
 
 x_test = [x_test[i].reshape(-1)*1/255 for i in range(len(x_test))]
-data_test = list(zip(x_test, y_test))[:1000]
+data_test = list(zip(x_test, y_test))
 
 epochs = 100
-data = list(zip(x_train,y_train))[:5000]
+data = list(zip(x_train,y_train))
 data_train, data_val = split(data, 0.8)
 n_classes = len(np.unique(y_train))
 
 print(f"\nDataset: \tTrain: {len(data_train)} | Val: {len(data_val)} | Test: {len(data_test)} | Clases: {np.unique(y_train)}\n")
 
-results = model.train(data_train,epochs,0.01,batch_size=232,loss=CrossEntropy(),adam=True, data_val = data_val)
+results = model.train(data_train,epochs,0.01,batch_size=250,loss=CrossEntropy(),adam=True, data_val = data_val)
 
 
 fig, axes = plt.subplots(1,3,figsize=(15, 4))
@@ -60,17 +60,17 @@ axes[1].grid(True, alpha = 0.3)
 # Results table
 acc_test, ls_test = model.test(data_test, CrossEntropy())
 
-axes[2].table(cellText= [[int(acc_test*100)], [round(ls_test,3)], [round(results['Time'],5)], [len(data_train)], [len(data_test)]],
+axes[2].table(cellText= [[int(acc_test*100)], [round(ls_test,3)], [round(results['Time']/60,5)], [len(data_train)], [len(data_test)]],
 
               cellColours = [['limegreen'],['lightcoral'],['aquamarine'], ['gray'], ['gray']],
               cellLoc = 'center',
               colLoc = 'center',
               rowLoc = 'center',
-              rowLabels = ['Accuracy Test', 'Loss Test', 'Time Training', 'Num Datapoints Train', 'Num Datapoints Test'],
+              rowLabels = ['Accuracy Test', 'Loss Test', 'Time Training (min)', 'Num Datapoints Train', 'Num Datapoints Test'],
               loc = 'center')
 axes[2].axis('off')
 axes[2].axis('tight')
-
+fig.suptitle(f"NN (784 -> 124 -> 124 -> 10)")
 plt.tight_layout()
 plt.savefig(f'mnist-test\\results-mnist.png', dpi=150, bbox_inches='tight')
 plt.close()

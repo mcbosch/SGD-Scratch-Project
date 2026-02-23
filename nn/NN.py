@@ -62,7 +62,7 @@ class NeuralNetwork:
         if str(loss) not in NeuralNetwork.LossFunctions: 
             raise TypeError(f"Please use some of the \033[1;31mavailable loss functions: {NeuralNetwork.LossFunctions}\033[0m")
         
-        print(f"\033[1m" + "="*8 + f"Training {self.name}" + "="*8)
+        print(f"\033[1m" + "="*8 + f"\tTraining {self.name}\t" + "="*8)
         print(f"\033[1;34mDatapoints:\033[0m\t{len(data)}\tGrouped in batches of size {batch_size}")
         print(f"\033[1;33mTrainable Parameters:\033[0m\t{self.n_trainable_parameters}")
         print(f"\033[1;32mNumber of Epochs:\033[0m\t{epochs}\n")
@@ -73,6 +73,9 @@ class NeuralNetwork:
 
         start_training_model = time.time()
         sys.stdout.write(f"\033[1mTraining:\t{'':40s}\n")
+        # ----- Initialize Momentums
+        momentums = [(0,0) for _ in range(len(self.layers))] if adam else None
+        t = 0
         for e in range(epochs):
             loss_epoch = []
             
@@ -90,17 +93,14 @@ class NeuralNetwork:
             sys.stdout.flush()
             
             # ----- Run over data
-            t = 0
-            # ----- Initialize Momentums
-            momentums = [(0,0) for _ in range(len(self.layers))] if adam else None
-
+            i = 0
             for X in data_loader:
-                t+=1
+                i+=1
                 x, y = X[0], X[1] 
                
                 # ------ Print format training
-                p2 = int(bar_width * t / total)
-                perc2 = int(100*t/total)
+                p2 = int(bar_width * i / total)
+                perc2 = int(100*i/total)
                 sys.stdout.write(f"\r\tEpoch {e+1:02d}:\t|\033[32;7m{' '*p2}\033[0m{' '*(bar_width-p2)}| {perc2:02d}%")
                 sys.stdout.flush()
 
@@ -115,6 +115,7 @@ class NeuralNetwork:
 
                 # ------ Backpropagate error
                 current_batch = len(x)
+                t+=1
                 _, momentums = self.layers.backpropagate(step=learning_rate,
                                                beta_1 = beta_1,
                                                beta_2 = beta_2,

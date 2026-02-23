@@ -14,8 +14,8 @@ Here we can find a good explanation on backpropagation in [*neuralnetworksanddee
 
 
 ## Future Updates
--   Incorporate ADAM and SGD optimitzation 
--   Train it for playground data and see plots of the loss and time of training
+
 -   Compare with a PyTorch NN 
+-   Analyze graphs. I have overparams?
 -   Scale this class to a VAE class
 -   Build a VAE class with Pytorch and compare results.
