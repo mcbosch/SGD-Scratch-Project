@@ -17,7 +17,7 @@ y_test = data['y_test']
 x_train = [x_train[i].reshape(-1)*1/255 for i in range(len(x_train))] # Normalize data to avoid overflow problems 
 model = NeuralNetwork([LinearLayer(784,524,activation="ReLU"),
                        LinearLayer(524,124,activation="ReLU"),
-                       LinearLayer(124,10,activation="ReLU")])
+                       LinearLayer(124,10,activation="Softmax")])
 
 x_test = [x_test[i].reshape(-1)*1/255 for i in range(len(x_test))]
 data_test = list(zip(x_test, y_test))[:1000]
@@ -72,6 +72,6 @@ axes[2].axis('off')
 axes[2].axis('tight')
 
 plt.tight_layout()
-plt.savefig(f'examples\\results-mnist.png', dpi=150, bbox_inches='tight')
+plt.savefig(f'mnist-test\\results-mnist.png', dpi=150, bbox_inches='tight')
 plt.close()
 print(f"\nPlot with results saved in mnist-test\\results-mnist.png")

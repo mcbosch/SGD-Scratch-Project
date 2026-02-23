@@ -150,12 +150,12 @@ class NeuralNetwork:
         n = len(data)
         acc = 0
         ls = 0
-        breakpoint()
+        
         for i in range(n):
             y = data[i][1]
             y_hat = self.forward(data[i][0])
             pred = np.argmax(y_hat)
-            ls += loss(y_hat, y)
+            ls += loss(y_hat, self.to_one_hot(y))
             acc +=  pred == y
         return acc/n, ls/n
     
