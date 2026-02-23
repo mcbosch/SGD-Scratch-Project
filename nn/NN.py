@@ -20,12 +20,13 @@ class NeuralNetwork:
 
     # DONE TODO - test
     def __init__(self, 
-                 **args):
+                 layers):
         
         self.name = "NN"
         self.layers = Sequence([])
         last_dim = -1
-        for layer in args:
+
+        for layer in layers:
             if last_dim < 0: last_dim = layer.n_out
             else: 
                 assert layer.n_in == last_dim, "Check the layers have correct dimensions"
@@ -105,12 +106,12 @@ class NeuralNetwork:
 
                 # ------ Forward datapoint
                 pred = self.forward(x)
-                y = self.to_one_hot(y)
+                y = self.to_one_hot_batch(y)
 
                 # ----- Compute loss and partial error
                 loss_epoch.append(loss(pred,y))
                 first_delta_comp = str(loss) == "CrossEntropy" and str(self.layers[-1].activation) == "Softmax"
-                delta = loss.partial(pred,y,activated_neurons= not first_delta_comp)
+                delta = loss.partial(pred,y,activated_neurons= not first_delta_comp) if first_delta_comp else loss.partial(pred,y)
 
                 # ------ Backpropagate error
                 current_batch = len(x)
@@ -149,6 +150,7 @@ class NeuralNetwork:
         n = len(data)
         acc = 0
         ls = 0
+        breakpoint()
         for i in range(n):
             y = data[i][1]
             y_hat = self.forward(data[i][0])
@@ -156,6 +158,21 @@ class NeuralNetwork:
             ls += loss(y_hat, y)
             acc +=  pred == y
         return acc/n, ls/n
+    
+    def to_one_hot(self, label):
+        n = self.layers[-1].n_out
+        v = np.zeros(shape = (n,))
+        v[label] = 1
+        return v
+    
+    def to_one_hot_batch(self, labels):
+        n = self.layers[-1].n_out
+        batch = len(labels)
+        Y = np.zeros((batch, n))
+        Y[np.arange(batch), labels] = 1
+        return Y
+
+
     def __str__(self):
         s = "Neural Network\n"
         ml = len(s)
@@ -215,7 +232,14 @@ class LinearLayer:
         return self.activation(self.z)
         
     def backpropagation(self, d, first_delta_computed = False):
-        self.cache = np.array(d) if first_delta_computed else d*self.activation.partial(self.z)
+   
+        if first_delta_computed:
+            self.cache = np.array(d)
+        elif str(self.activation) == 'Softmax':
+            self.cache = np.vecmat(d,self.activation.partial(self.z))
+        else:
+            self.cache = d*self.activation.partial(self.z)
+        
         return self.cache @ self.weights.T
 
     def update_parameters(self, 
@@ -228,6 +252,7 @@ class LinearLayer:
                           t = 1, 
                           adam = True):
         # Verify if we are working by batches and compute partial of weights in each case
+
         if batch == 1:
             partial_bias = self.cache
             partial_weights = np.outer(self.x, self.cache)

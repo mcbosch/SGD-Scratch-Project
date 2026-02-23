@@ -124,9 +124,9 @@ class MSE:
         x, y = args[0], args[1]
         batch = len(x) if len(x.shape) > 1 else 1
         if respect_to == "y":
-            return (y-x)*1/batch
+            return (y-x)/batch
         elif respect_to == "x":
-            return (x-y)*1/batch
+            return (x-y)/batch
 
     def __str__(self):
         return "MSE"
