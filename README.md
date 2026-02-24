@@ -23,7 +23,7 @@ To finish the project I had to main problems. The first was when I added the SGD
 
 The other problem I had was adding ADAM. It's important to know that in ADAM, the variable time for the bias correction increases in every update, for every datapoint, for every epoch. I was redifining the time and the momentums at 0 for each epoch. I noticed this problem when I trained over all the mnist-dataset and noticed this:
 
-<img src = "./mnist-test/something-strange.png">
+<img src = "./mnist-test/img/something-strange.png">
 
 Then I started a debbuging process, searching errors in the optimitzation function and found the ADAM problem. 
 
@@ -33,7 +33,7 @@ Once every problem was fixed i runed the model for my toy datasets. I used a neu
 
 <img src = "./examples/img/results-square.png" caption="Circle Regions" width=70%> <img src = "./examples/img/sq_regions.png" width=25%>
 
-Here the model makes a better training, note that in the circle regions has less datapoints and thus it has a poorly acc. I'll make a future update with the results of the mnist-dataset. But it takes 2h for the training and testing.
+Here the model makes a better training, note that in the circle regions has less datapoints. I'll make a future update with the results of the mnist-dataset. But it takes 2h for the training and testing.
 ## Future Updates
 
 -   Compare with a PyTorch NN 
