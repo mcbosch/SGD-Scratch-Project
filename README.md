@@ -33,7 +33,9 @@ Once every problem was fixed i runed the model for my toy datasets. I used a neu
 
 <img src = "./examples/img/results-square.png" caption="Circle Regions" width=70%> <img src = "./examples/img/sq_regions.png" width=25%>
 
-Here the model makes a better training, note that in the circle regions has less datapoints. I'll make a future update with the results of the mnist-dataset. But it takes 2h for the training and testing.
+Here the model makes a better training, note that in the circle regions has less datapoints. The results of the model trained over all the mnist-dataset:
+
+<img src = "./mnist-test/img/results-mnist.png">
 ## Future Updates
 
 -   Compare with a PyTorch NN 

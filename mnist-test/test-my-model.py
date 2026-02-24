@@ -15,8 +15,8 @@ x_test = data['x_test']
 y_test = data['y_test']
 # Transforming to vectors
 x_train = [x_train[i].reshape(-1)*1/255 for i in range(len(x_train))] # Normalize data to avoid overflow problems 
-model = NeuralNetwork([LinearLayer(784,124,activation="ReLU"),
-                       LinearLayer(124,124,activation="ReLU"),
+model = NeuralNetwork([LinearLayer(784,524,activation="ReLU"),
+                       LinearLayer(524,124,activation="ReLU"),
                        LinearLayer(124,10,activation="Softmax")])
 
 x_test = [x_test[i].reshape(-1)*1/255 for i in range(len(x_test))]
@@ -70,7 +70,7 @@ axes[2].table(cellText= [[int(acc_test*100)], [round(ls_test,3)], [round(results
               loc = 'center')
 axes[2].axis('off')
 axes[2].axis('tight')
-fig.suptitle(f"NN (784 -> 124 -> 124 -> 10)")
+fig.suptitle(f"NN (784 -> 524 -> 124 -> 10)")
 plt.tight_layout()
 plt.savefig(f'mnist-test\\img\\results-mnist.png', dpi=150, bbox_inches='tight')
 plt.close()
