@@ -72,6 +72,6 @@ axes[2].axis('off')
 axes[2].axis('tight')
 
 plt.tight_layout()
-plt.savefig(f'examples\\results-{data_name}.png', dpi=150, bbox_inches='tight')
+plt.savefig(f'examples\\img\\results-{data_name}.png', dpi=150, bbox_inches='tight')
 plt.close()
-print(f"\nPlot with results saved in examples\\results-{data_name}.png")
+print(f"\nPlot with results saved in examples\\img\\results-{data_name}.png")
