@@ -15,7 +15,7 @@ Here we can find a good explanation on backpropagation in [*neuralnetworksanddee
 
 # Documentation
 
-I will write a documentation in `html` and add it in my github page. For now you can read de `documentation.md` file. 
+You have some documentation in my webpage: [sgd-doc](https://mcbosch.github.io/documentations/sgd-scratch-project/index-sgd.html). 
 
 # Results & Problems
 
@@ -36,6 +36,7 @@ Once every problem was fixed i runed the model for my toy datasets. I used a neu
 Here the model makes a better training, note that in the circle regions has less datapoints. The results of the model trained over all the mnist-dataset:
 
 <img src = "./mnist-test/img/results-mnist.png">
+
 ## Future Updates
 
 -   Compare with a PyTorch NN 

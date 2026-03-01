@@ -194,7 +194,6 @@ class LinearLayer:
                  n_cels_out, 
                  bias = True, 
                  activation = 'ReLU',
-                 batch = 1,
                  random_seed = None):
         """
         Parameters
